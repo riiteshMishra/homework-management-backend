@@ -268,7 +268,10 @@ exports.getHomework = async (req, res, next) => {
             .findById(homeworkId)
             .populate("students")
             .populate("teacher", "name email image")
-            .populate("submissions");
+            .populate({
+                path: "submissions",
+                populate: "student"
+            });
 
         if (!homework)
             return next(new AppError("Homework not found", 404));

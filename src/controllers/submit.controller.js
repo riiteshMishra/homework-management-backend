@@ -88,7 +88,8 @@ exports.getAllSubmissons = async (req, res, next) => {
 // Check homework
 exports.createResult = async (req, res, next) => {
     try {
-        let { studentId, homeworkId, marks, feedback, isLate } = req.body;
+        const { homeworkId } = req.params;
+        let { studentId, marks, feedback, isLate } = req.body;
 
         if (!studentId || !homeworkId)
             return next(new AppError("All fields are required", 409));
