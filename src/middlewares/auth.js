@@ -1,6 +1,7 @@
 const AppError = require("../utils/AppError");
 const jwt = require("jsonwebtoken");
 const ACCOUNT_TYPE = require("../utils/helper");
+const UserModel = require("../models/User.model")
 
 // authentication
 exports.auth = async (req, res, next) => {
@@ -37,39 +38,48 @@ exports.auth = async (req, res, next) => {
 // is Teacher
 exports.isTeacher = async (req, res, next) => {
     try {
-        // check
         if (!req.user) {
             return next(new AppError("Unauthorized access", 401));
         }
 
-        // compare
-        if (req.user.accountType !== ACCOUNT_TYPE.TEACHER) {
+        const user = await UserModel.findById(req.user.userId);
+
+        if (!user) {
+            return next(new AppError("User not found", 404));
+        }
+
+        if (user.accountType !== ACCOUNT_TYPE.TEACHER) {
             return next(new AppError("Only teachers allowed", 403));
         }
-        next()
+
+        next();
     } catch (err) {
         console.log("Error while validating Teacher", err);
-        return next(new AppError(err))
+        return next(new AppError(err.message || "Server Error"));
     }
-}
+};
 
 
 // isStudent
 exports.isStudent = async (req, res, next) => {
     try {
-        // check
         if (!req.user) {
             return next(new AppError("Unauthorized access", 401));
         }
 
-        // compare
-        if (req.user.accountType !== ACCOUNT_TYPE.STUDENT) {
+        const user = await UserModel.findById(req.user.userId);
+
+        if (!user) {
+            return next(new AppError("User not found", 404));
+        }
+
+        if (user.accountType !== ACCOUNT_TYPE.STUDENT) {
             return next(new AppError("Only students allowed", 403));
         }
 
-        next()
+        next();
     } catch (err) {
         console.log("Error while validating Student", err);
-        return next(new AppError(err))
+        return next(new AppError(err.message || "Server Error"));
     }
-}
+};

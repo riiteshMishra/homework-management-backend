@@ -32,6 +32,12 @@ const userSchema = new mongoose.Schema({
     image: {
         type: String,
         trim: true,
+    },
+    status: {
+        type: String,
+        enum: ['active', 'banned'],
+        default: 'active',
+        required: true,
     }
 });
 

@@ -99,66 +99,66 @@ exports.login = async (req, res, next) => {
     try {
         let { email, password } = req.body;
 
-        // check
         if (!email || !password)
-            return next(new AppError("All Fields are required", 400));
+            return next(new AppError("All fields are required", 400));
 
-        // sanitization
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        // sanitize
         email = email.toString().toLowerCase().trim();
         password = password.toString().trim();
 
-        if (!emailRegex.test(email)) {
-            return next(new AppError("Invalid email format", 400));
-        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        // check user
-        const user = await USER_MODEL.findOne({ email }).select("+password");
+        if (!emailRegex.test(email))
+            return next(new AppError("Invalid email format", 400));
+
+        // user
+        const user = await UserModel.findOne({ email }).select("+password");
 
         if (!user)
-            return next(new AppError("User not found please login", 400));
+            return next(new AppError("Invalid email or password", 401));
 
-        // compare password
+        // password
         const isMatched = await bcrypt.compare(password, user.password);
 
         if (!isMatched)
-            return next(new AppError("Invalid Password", 400));
+            return next(new AppError("Invalid email or password", 401));
 
-        // create refressh and access token
-        const JWT_SECRET = process.env.JWT_SECRET;
+        // ban check
+        if (user.status === "banned")
+            return next(new AppError("This account is banned", 403));
 
-        // refresh token
+        // token
         const payload = {
-            userId: user?._id,
-            accountType: user?.accountType,
-        }
-        const token = await jwt.sign(
-            payload,
-            JWT_SECRET,
-            { expiresIn: "7d" }
-        );
+            userId: user._id,
+            accountType: user.accountType,
+        };
 
-        // save in cookies
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+            expiresIn: "7d",
+        });
+
+        // remove password
+        user.password = undefined;
+
+        // cookie
         res.cookie("token", token, {
             httpOnly: true,
             secure: isProduction,
-            maxAge: 24 * 60 * 60 * 1000
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
-
-        const updatedUser = await UserModel.findById(user?._id);
-        // return response
         return res.status(200).json({
             success: true,
-            message: "logged in",
+            message: "Logged in successfully",
             token,
-            user: updatedUser
-        })
+            user,
+        });
+
     } catch (err) {
         console.log("Error while login", err);
-        return next(new AppError(err))
+        return next(new AppError(err.message, 500));
     }
-}
+};
 
 // get user details
 exports.getUserDetails = async (req, res, next) => {

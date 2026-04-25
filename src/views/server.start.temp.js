@@ -56,7 +56,7 @@ const appTheme = `
 </head>
 <body>
   <div class="card">
-    <h1>🚀 Welcome to Internshala</h1>
+    <h1>Welcome to Homework Hub</h1>
     <p>Your backend is running successfully</p>
     <button class="btn">Let's Go</button>
   </div>

@@ -15,6 +15,7 @@ dbconnect();
 const authRoutes = require("./src/routes/auth.routes");
 const homeworkRoutes = require("./src/routes/homework.routes")
 const submissionRoute = require("./src/routes/submisson.routes")
+const teacherRoutes = require("./src/routes/teacher.routes");
 
 // MIDDLEWARES
 app.use(express.json());
@@ -53,6 +54,7 @@ app.get("/", (req, res) => {
 app.use("/api/v1/auth", authRoutes)
 app.use("/api/v1/homework", homeworkRoutes);
 app.use("/api/v1/submission", submissionRoute)
+app.use("/api/v1/teacher", teacherRoutes)
 
 
 app.use(errorHandler)
